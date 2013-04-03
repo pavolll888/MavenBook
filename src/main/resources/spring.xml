@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                           http://www.springframework.org/schema/tx
+                           http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context.xsd">
+ 
+    <!--<context:annotation-config/> -->
+    <!-- is going to lookfor annotation in a package book -->
+    <context:component-scan base-package="book"/>
+    <!--activated mapping to look for properties in hibernate properties  -->
+    <context:property-placeholder location="classpath:hibernate.properties"/>
+ 
+ 	
+ 	 <bean id="bookService" class="book.BookServiceImpl">
+        <property name="bookRepository" ref="bookRepository"/>
+    </bean>
+    
+     <bean id="bookRepository" class="book.BookRepositoryImpl">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+ 
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+ 
+ 	<!--main spring feature session factory object is not to be created in class howewer is done here in spring xml -->
+ 	
+ 	<!-- private static void configureSessionFactory() throws HibernateException {
+		Configuration configuration = new Configuration();
+		configuration.configure();
+		ServiceRegistry serviceRegistry = new ServiceRegistryBuilder().applySettings(configuration.getProperties()).buildServiceRegistry();
+		sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+		
+		SessionFactory sessionfactory = new Configuration().configure().buildSessionFactory();	
+	}
+	configureSessionFactory();
+	Session session = sessionFactory.openSession();
+	session.beginTransaction(); -->
+    <bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+ 
+     <bean id="sessionFactory"
+           class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="packagesToScan" value="book" />
+	</bean>
+ 
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${jdbc.driverClassName}" />
+        <property name="url" value="${jdbc.url}" />
+        <property name="username" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+    </bean>
+
+ 
+</beans>
